@@ -1,5 +1,12 @@
 # AndrewSpecial
+
 AndrewSpecial, dumping lsass' memory stealthily and bypassing "Cilence" since 2019.
+
+How to compile:
+
+```
+cl *.cpp /DUNICODE
+```
 
 How to use:
 
