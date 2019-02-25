@@ -8,6 +8,7 @@
 
 #pragma comment (lib, "Dbghelp.lib")
 #pragma comment (lib, "ntdll.lib")
+#pragma comment (lib, "advapi32.lib")
 
 void getversion_long();
 bool AndrewSpecial(const wchar_t * ProcessName);
