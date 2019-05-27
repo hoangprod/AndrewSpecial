@@ -1,6 +1,6 @@
 # AndrewSpecial
 
-AndrewSpecial, dumping lsass' memory stealthily and bypassing "Cilence" since 2019.
+AndrewSpecial, dumping lsass' memory stealthily and bypassing "Cylance" since 2019.
 
 How to compile:
 
